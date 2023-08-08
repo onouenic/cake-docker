@@ -39,7 +39,6 @@ RUN a2enmod rewrite
 # Conceder permissão
 RUN chmod -R 755 /var/www/html/
 RUN chmod -R 755 /tmp/
-RUN chmod +w /etc/apache2/
 
 # Exponha a porta 80
 EXPOSE 80
