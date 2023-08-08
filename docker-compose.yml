@@ -1,0 +1,17 @@
+version: '3'
+services:
+  php-apache:
+    container_name: php-apache
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "1001:1001"
+    ports:
+      - "80:80"
+    volumes:
+      - /opt/sites/:/var/www/html/
+
+networks:
+  default:
+    external:
+      name: internal
