@@ -27,6 +27,12 @@ Este repositório registra as diferentes versões do projeto, detalhando as impl
   - Instalação do Vim
   - E adicionado comando para ativar o módulo rewrite
 
+## Versão: v1.3
+
+- Nesta versão, as seguintes melhorias foram feitas:
+  - Removido a criação do container mysql do docker-compose.yml
+  - E adicionado uma opção no php.ini para definir o caminho do arquivos para salvar as sessões.
+
 ## Autor
 
 Este projeto foi desenvolvido por Filipe Onoue.
