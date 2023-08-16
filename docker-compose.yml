@@ -22,7 +22,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - /opt/sites/:/var/www/html/
+      #- /opt/sites/:/var/www/html/
+      - /opt/sites/form-podcast/www/:/var/www/html/
 
 networks:
   default:
