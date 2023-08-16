@@ -27,6 +27,12 @@ Este repositório registra as diferentes versões do projeto, detalhando as impl
   - Instalação do Vim
   - E adicionado comando para ativar o módulo rewrite
 
+## Versão: Cake4
+
+- Nesta versão, as seguintes melhorias foram feitas:
+  Alterado o Dockerfile para atender aos requisitos dos do cake4.
+  By Marcio Felder.
+
 ## Autor
 
 Este projeto foi desenvolvido por Filipe Onoue.
