@@ -20,6 +20,11 @@ COPY ./Config/000-default.conf /etc/apache2/sites-available/000-default.conf
 # Instale as dependências do apache2
 RUN a2enmod
 
+RUN apt-get -y update \ 
+    && apt-get install -y libicu-dev zlib1g-dev libicu-dev g++ \ 
+    && docker-php-ext-configure intl \ 
+    && docker-php-ext-install intl
+
 # Instale as dependências necessárias e as extensões do PHP
 RUN docker-php-ext-install pdo pdo_mysql
 
@@ -37,8 +42,8 @@ RUN apt-get update -y && apt-get upgrade -y && \
 RUN a2enmod rewrite
 
 # Conceder permissão
-RUN chmod -R 755 /var/www/html/
-RUN chmod -R 755 /tmp/
+RUN chmod -R 777 /var/www/html/
+RUN chmod -R 777 /tmp/
 
 # Exponha a porta 80
 EXPOSE 80
