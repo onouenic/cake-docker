@@ -33,6 +33,12 @@ Este repositório registra as diferentes versões do projeto, detalhando as impl
   - Removido a criação do container mysql do docker-compose.yml
   - E adicionado uma opção no php.ini para definir o caminho do arquivos para salvar as sessões.
 
+## Versão: Cursos-admin-v1.0
+
+- Nesta versão, as seguintes melhorias foram feitas:
+  - Versão funcional do container rodando cursos-admin.
+  - Não foram feitas nenhuma alteração nos arquivos após conseguir rodar com êxito o cursos-admin
+
 ## Autor
 
 Este projeto foi desenvolvido por Filipe Onoue.
