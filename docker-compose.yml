@@ -5,11 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    user: "1001:1001"
+    # user : "1001:1001"
+    user: root:root
+    extra_hosts:
+      - 'comunic.homologacao.devsys.nic.br:2001:12ff:0:4144:f816:3eff:fe5f:3fae'
     ports:
       - "80:80"
     volumes:
-      - /opt/sites/:/var/www/html/
+      - /opt/sites/cursos-admin/www/:/var/www/html/
+    command: sh -c "usermod --non-unique --uid 1001 www-data && groupmod --non-unique --gid 1001 www-data && chown -R www-data:www-data /var/www/html/ && apache2-foreground && cd app/Plugin/AuditoriaNIC && git submodule init && git submodule update"
 
 networks:
   default:
