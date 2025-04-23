@@ -17,9 +17,6 @@ COPY ./Config/apache2.conf /etc/apache2/apache2.conf
 # Copia o arquivo 000-default para o container
 COPY ./Config/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Copia o arquivo dns.conf para o container
-COPY ./Config/dns.conf /etc/apache2/sites-available/dns.conf
-
 # Ativa os sites
 RUN a2ensite *.conf
 
