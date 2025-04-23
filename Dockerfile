@@ -17,8 +17,14 @@ COPY ./Config/apache2.conf /etc/apache2/apache2.conf
 # Copia o arquivo 000-default para o container
 COPY ./Config/000-default.conf /etc/apache2/sites-available/000-default.conf
 
+# Copia o arquivo dns.conf para o container
+COPY ./Config/dns.conf /etc/apache2/sites-available/dns.conf
+
+# Ativa os sites
+RUN a2ensite *.conf
+
 # Instale as dependências do apache2
-RUN a2enmod
+RUN a2enmod proxy proxy_http rewrite
 
 # Instale as dependências necessárias e as extensões do PHP
 RUN docker-php-ext-install pdo pdo_mysql mysqli
@@ -31,45 +37,27 @@ RUN apt-get update -y && apt-get install -y libmcrypt-dev
 RUN pecl install mcrypt-1.0.4
 RUN docker-php-ext-enable mcrypt
 
+# Instalando git e vi
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install git vim -y
+
 # Copie o arquivo php.ini para dentro do container
 COPY php.ini /usr/local/etc/php/php.ini
 
 # Configure o Apache para carregar o módulo PHP e iniciar em primeiro plano
 RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apache2/apache2.conf
 
-# Instalando git e vi
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install git vim -y
-
-# Clonando plugin AuditoriaNic
-# RUN cd app/Plugin/AuditoriaNic/ && \
-    # git submodule init && \
-    # git submodule update && cd ../../../
-
 # Ative o módulo rewrite diretamente no Dockerfile
 RUN a2enmod rewrite
-
-# Conceder permissão
-# RUN groupmod -g 1000 sharedgroup && usermod -u 1000 -g 1000 onoue
 
 ARG USER_ID=1001
 ARG GROUP_ID=1001
 
-# USER onoue
-# RUN groupadd -r sharedgroup && useradd -r -g sharedgroup -G sharedgroup www-data
-# RUN chown -R www-data:sharedgroup /var/www/html/
-# RUN chmod -R 755 /var/www/html/ 
-# RUN chmod -R 755 /var/www/html/tmp/
-# RUN chmod -R 755 /tmp/
-# RUN usermod --non-unique --uid 1001 www-data \
-#     && groupmod --non-unique --gid 1001 www-data \
-#     && chown -R www-data:www-data /var/www/html/
-
 # cria o diretório /var/lib/php/sessions
-RUN cd /var/lib/ && mkdir -p php/sessions
+RUN mkdir -p /var/lib/php/sessions && chown ${USER_ID} /var/lib/php/sessions
+
+# Cria um diretório temporário para uploads
+RUN mkdir -p /tmp/uploads && chown ${USER_ID}:${GROUP_ID} /tmp/uploads && chmod 777 /tmp/uploads
 
 # Exponha a porta 80
 EXPOSE 80
-
-# Comando para iniciar o Apache em primeiro plano
-# CMD ["apache2-foreground"]
