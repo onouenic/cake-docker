@@ -3,8 +3,3 @@
 
 # docker
 docker-compose.override.yml
-
-# config
-./Config
-php.ini
-script.sh
