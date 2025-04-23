@@ -6,6 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # user: "1001:1001"
+    # extra_hosts:
+    # ports:
     volumes:
       - /opt/sites/cursos-e-eventos/www/:/var/www/html/
       - /opt/sites/:/opt/sites/
