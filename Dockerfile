@@ -41,35 +41,26 @@ RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apac
 RUN apt-get update -y && apt-get upgrade -y && \
     apt-get install git vim -y
 
-# Clonando plugin AuditoriaNic
-# RUN cd app/Plugin/AuditoriaNic/ && \
-    # git submodule init && \
-    # git submodule update && cd ../../../
+# Copie o arquivo cacert.pem para dentro do container
+COPY ./Config/cacert.pem /usr/local/share/ca-certificates/cacert.pem
+COPY ./Config/cacert.pem /etc/ssl/certs/cacert.pem
+
+# Atualize os certificados confiáveis
+RUN update-ca-certificates
+
+# Configure o PHP para usar o cacert.pem
+RUN echo "openssl.cafile=/usr/local/share/ca-certificates/cacert.pem" >> /usr/local/etc/php/php.ini \
+    && echo "curl.cainfo=/usr/local/share/ca-certificates/cacert.pem" >> /usr/local/etc/php/php.ini
+
 
 # Ative o módulo rewrite diretamente no Dockerfile
 RUN a2enmod rewrite
 
-# Conceder permissão
-# RUN groupmod -g 1000 sharedgroup && usermod -u 1000 -g 1000 onoue
-
 ARG USER_ID=1001
 ARG GROUP_ID=1001
 
-# USER onoue
-# RUN groupadd -r sharedgroup && useradd -r -g sharedgroup -G sharedgroup www-data
-# RUN chown -R www-data:sharedgroup /var/www/html/
-# RUN chmod -R 755 /var/www/html/ 
-# RUN chmod -R 755 /var/www/html/tmp/
-# RUN chmod -R 755 /tmp/
-# RUN usermod --non-unique --uid 1001 www-data \
-#     && groupmod --non-unique --gid 1001 www-data \
-#     && chown -R www-data:www-data /var/www/html/
-
 # cria o diretório /var/lib/php/sessions
-RUN cd /var/lib/ && mkdir -p php/sessions
+RUN mkdir -p /var/lib/php/sessions && chown ${USER_ID} /var/lib/php/sessions
 
 # Exponha a porta 80
 EXPOSE 80
-
-# Comando para iniciar o Apache em primeiro plano
-# CMD ["apache2-foreground"]
