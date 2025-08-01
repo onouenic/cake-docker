@@ -31,6 +31,11 @@ RUN apt-get update -y && apt-get install -y libmcrypt-dev
 RUN pecl install mcrypt-1.0.4
 RUN docker-php-ext-enable mcrypt
 
+# Instala a extensão zip do PHP
+RUN apt-get update && apt-get install -y libzip-dev zip \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip
+
 # Instalando git e vi
 RUN apt-get update -y && apt-get upgrade -y && \
     apt-get install git vim -y
