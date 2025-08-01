@@ -17,44 +17,47 @@ COPY ./Config/apache2.conf /etc/apache2/apache2.conf
 # Copia o arquivo 000-default para o container
 COPY ./Config/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Ativa os sites
-RUN a2ensite *.conf
-
 # Instale as dependências do apache2
-RUN a2enmod proxy proxy_http rewrite
+RUN a2enmod
 
 # Instale as dependências necessárias e as extensões do PHP
-RUN docker-php-ext-install pdo pdo_mysql mysqli
-
-# Instalando as dependências sockets para o projeto cursos-admin
-RUN docker-php-ext-install sockets
+RUN docker-php-ext-install pdo pdo_mysql mysqli sockets
 
 # Instalando as dependências mcrypt para o projeto cursos-admin
 RUN apt-get update -y && apt-get install -y libmcrypt-dev
 RUN pecl install mcrypt-1.0.4
 RUN docker-php-ext-enable mcrypt
 
-# Instalando git e vi
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install git vim -y
+# Instala o OpenSSL e os certificados
+RUN apt-get install -y openssl ca-certificates
+
+# Baixa o arquivo cacert.pem atualizado diretamente da fonte oficial
+RUN curl -o /etc/ssl/certs/cacert.pem https://curl.se/ca/cacert.pem
+
+# Atualiza os certificados confiáveis do sistema
+RUN update-ca-certificates
 
 # Copie o arquivo php.ini para dentro do container
 COPY php.ini /usr/local/etc/php/php.ini
 
+# Configure o PHP para usar o cacert.pem
+RUN echo "openssl.cafile=/etc/ssl/certs/cacert.pem" >> /usr/local/etc/php/php.ini \
+    && echo "curl.cainfo=/etc/ssl/certs/cacert.pem" >> /usr/local/etc/php/php.ini
+
 # Configure o Apache para carregar o módulo PHP e iniciar em primeiro plano
 RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apache2/apache2.conf
+
+# Instalando git e vi
+RUN apt-get update -y && apt-get upgrade -y && apt-get install git vim -y
 
 # Ative o módulo rewrite diretamente no Dockerfile
 RUN a2enmod rewrite
 
-ARG USER_ID=1001
-ARG GROUP_ID=1001
-
-# cria o diretório /var/lib/php/sessions
+# Cria o diretório /var/lib/php/sessions
 RUN mkdir -p /var/lib/php/sessions && chown ${USER_ID} /var/lib/php/sessions
 
-# Cria um diretório temporário para uploads
-RUN mkdir -p /tmp/uploads && chown ${USER_ID}:${GROUP_ID} /tmp/uploads && chmod 777 /tmp/uploads
+# Cria o diretório /tmp/uploads
+RUN mkdir -p /tmp/uploads && chown www-data:www-data /tmp/uploads && chmod 777 /tmp/uploads
 
 # Exponha a porta 80
 EXPOSE 80

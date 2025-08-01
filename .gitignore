@@ -2,3 +2,5 @@
 /mysql
 
 docker-compose.override.yml
+
+cacert.pem
