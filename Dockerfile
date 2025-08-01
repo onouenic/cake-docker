@@ -21,55 +21,43 @@ COPY ./Config/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod
 
 # Instale as dependências necessárias e as extensões do PHP
-RUN docker-php-ext-install pdo pdo_mysql mysqli
-
-# Instalando as dependências sockets para o projeto cursos-admin
-RUN docker-php-ext-install sockets
+RUN docker-php-ext-install pdo pdo_mysql mysqli sockets
 
 # Instalando as dependências mcrypt para o projeto cursos-admin
 RUN apt-get update -y && apt-get install -y libmcrypt-dev
 RUN pecl install mcrypt-1.0.4
 RUN docker-php-ext-enable mcrypt
 
+# Instala o OpenSSL e os certificados
+RUN apt-get install -y openssl ca-certificates
+
+# Baixa o arquivo cacert.pem atualizado diretamente da fonte oficial
+RUN curl -o /etc/ssl/certs/cacert.pem https://curl.se/ca/cacert.pem
+
+# Atualiza os certificados confiáveis do sistema
+RUN update-ca-certificates
+
 # Copie o arquivo php.ini para dentro do container
 COPY php.ini /usr/local/etc/php/php.ini
+
+# Configure o PHP para usar o cacert.pem
+RUN echo "openssl.cafile=/etc/ssl/certs/cacert.pem" >> /usr/local/etc/php/php.ini \
+    && echo "curl.cainfo=/etc/ssl/certs/cacert.pem" >> /usr/local/etc/php/php.ini
 
 # Configure o Apache para carregar o módulo PHP e iniciar em primeiro plano
 RUN sed -i 's/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/' /etc/apache2/apache2.conf
 
 # Instalando git e vi
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install git vim -y
-
-# Clonando plugin AuditoriaNic
-# RUN cd app/Plugin/AuditoriaNic/ && \
-    # git submodule init && \
-    # git submodule update && cd ../../../
+RUN apt-get update -y && apt-get upgrade -y && apt-get install git vim -y
 
 # Ative o módulo rewrite diretamente no Dockerfile
 RUN a2enmod rewrite
 
-# Conceder permissão
-# RUN groupmod -g 1000 sharedgroup && usermod -u 1000 -g 1000 onoue
+# Cria o diretório /var/lib/php/sessions
+RUN mkdir -p /var/lib/php/sessions && chown ${USER_ID} /var/lib/php/sessions
 
-ARG USER_ID=1001
-ARG GROUP_ID=1001
-
-# USER onoue
-# RUN groupadd -r sharedgroup && useradd -r -g sharedgroup -G sharedgroup www-data
-# RUN chown -R www-data:sharedgroup /var/www/html/
-# RUN chmod -R 755 /var/www/html/ 
-# RUN chmod -R 755 /var/www/html/tmp/
-# RUN chmod -R 755 /tmp/
-# RUN usermod --non-unique --uid 1001 www-data \
-#     && groupmod --non-unique --gid 1001 www-data \
-#     && chown -R www-data:www-data /var/www/html/
-
-# cria o diretório /var/lib/php/sessions
-RUN cd /var/lib/ && mkdir -p php/sessions
+# Cria o diretório /tmp/uploads
+RUN mkdir -p /tmp/uploads && chown www-data:www-data /tmp/uploads && chmod 777 /tmp/uploads
 
 # Exponha a porta 80
 EXPOSE 80
-
-# Comando para iniciar o Apache em primeiro plano
-# CMD ["apache2-foreground"]
